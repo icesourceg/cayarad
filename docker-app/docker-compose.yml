@@ -1,0 +1,29 @@
+version: '3'
+services: 
+
+  postgresql:
+    container_name: postgresql
+    image: postgres:alpine
+    ports: 
+      - 5432:5432
+    environment:
+      - POSTGRES_PASSWORD=mypass123
+      - POSTGRES_USER=root
+      - POSTGRES_DB=freeradius
+    volumes:
+      - ${HOME}/App-data/postgresql/storage:/var/lib/postgresql/data
+      - ${HOME}/App-data/postgresql/share:/share
+
+  freeradius:
+    container_name: freeradius
+    build: freeradius/.
+    ports:
+      - 1812:1812/udp
+      - 1813:1813/udp
+      - 1814:1814/udp
+      - 18120:18120/udp
+    depends_on:
+      - postgresql
+    #command: ["./wait-for-it.sh", "postgresql:5432", "--", "/usr/sbin/freeradius", "-XXX"]
+    links:
+      - postgresql
