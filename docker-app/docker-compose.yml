@@ -1,29 +1,59 @@
 version: '3'
 services: 
 
-  postgresql:
-    container_name: postgresql
-    image: postgres:alpine
-    ports: 
-      - 5432:5432
+  cayamariadb:
+    container_name: cayamariadb
+    build: ./mariadb-alpine
+    ports:
+      - 3306:3306
     environment:
-      - POSTGRES_PASSWORD=mypass123
-      - POSTGRES_USER=root
-      - POSTGRES_DB=freeradius
+      - MYSQL_DATABASE=cayaradsql
+      - MYSQL_USER=ucaya
+      - MYSQL_PASSWORD=passcaya-2019
+      - MYSQL_ROOT_PASSWORD=cayapsql-19
     volumes:
-      - ${HOME}/App-data/postgresql/storage:/var/lib/postgresql/data
-      - ${HOME}/App-data/postgresql/share:/share
-
-  freeradius:
-    container_name: freeradius
-    build: freeradius/.
+      - ../docker-data/cayamariadb/storage:/var/lib/mysql
+      - ../docker-data/cayamariadb/share:/share
+      - ../docker-config/cayamariadb/my.cnf.d:/etc/my.cnf.d
+    healthcheck:
+      test: "nc -z localhost 3306"
+      interval: 1s
+      retries: 120
+  
+  cayarad:
+    restart: on-failure
+    container_name: cayarad
+    build: freerad-alpine/.
+    environment:
+      - radiusdbserver=cayamariadb
+      - radiusdbusername=ucaya
+      - radiusdbpassword=passcaya-2019
+      - radiusdbport=3306
+      - radiusdbname=cayaradsql
     ports:
       - 1812:1812/udp
       - 1813:1813/udp
       - 1814:1814/udp
-      - 18120:18120/udp
     depends_on:
-      - postgresql
-    #command: ["./wait-for-it.sh", "postgresql:5432", "--", "/usr/sbin/freeradius", "-XXX"]
+      - cayamariadb
     links:
-      - postgresql
+      - cayamariadb
+
+  cayadalo:
+    restart: on-failure
+    container_name: cayadalo
+    build: ./dalo-alpine
+    environment:
+      - MYSQL_HOST=cayamariadb
+      - APACHE_SERVER_NAME=cayadalo.docker.localhost
+      - PHP_SHORT_OPEN_TAG=On
+      - PHP_ERROR_REPORTING="E_ALL & ~E_NOTICE & ~E_STRICT & ~E_DEPRECATED"
+      - PHP_DISPLAY_ERRORS=Off
+      - PHP_HTML_ERRORS=Off
+      - PHP_XDEBUG_ENABLED=true
+    ports:
+      - 8000:80/tcp
+    depends_on:
+      - cayamariadb
+    links:
+      - cayamariadb
