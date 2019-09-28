@@ -13,6 +13,8 @@ RUN rm -f /var/cache/apk/*
 RUN cp /usr/share/zoneinfo/Asia/Jakarta /etc/localtime
 RUN echo "Asia/Jakarta" >  /etc/timezone
 
+COPY ./config/php7/php.ini /etc/php7/php.ini
+
 COPY ./web/public /app/public
 RUN chown -R apache:apache /app && chmod -R 755 /app
 

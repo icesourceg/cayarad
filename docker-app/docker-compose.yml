@@ -47,7 +47,6 @@ services:
       - MYSQL_HOST=cayamariadb
       - APACHE_SERVER_NAME=cayadalo.docker.localhost
       - PHP_SHORT_OPEN_TAG=On
-      #- PHP_ERROR_REPORTING="E_ALL & ~E_NOTICE & ~E_STRICT & ~E_DEPRECATED"
       - PHP_DISPLAY_ERRORS=Off
       - PHP_HTML_ERRORS=Off
       - PHP_XDEBUG_ENABLED=true
