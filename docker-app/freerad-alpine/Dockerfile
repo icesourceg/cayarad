@@ -2,10 +2,13 @@ FROM alpine:latest
 
 RUN apk update && apk upgrade && \
     apk add --no-cache freeradius freeradius-client freeradius-python \
-    freeradius-postgresql freeradius-radclient \
+    freeradius-postgresql freeradius-radclient tzdata\
     freeradius-unixodbc freeradius-mysql freeradius-lib \
     freeradius-rest bash  && \ 
     rm -f /var/cache/apk/*
+RUN cp /usr/share/zoneinfo/Asia/Jakarta /etc/localtime
+RUN echo "Asia/Jakarta" >  /etc/timezone
+
 
 COPY config/raddb /etc/raddb
 RUN chown -R root:radius /etc/raddb
